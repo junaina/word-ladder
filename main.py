@@ -79,11 +79,11 @@ def convert_words_to_a_graph():
 
 #ucs- words have been grouped by length and it takes equal amount of time to get from one word to  the other.
 
-word_graph = convert_words_to_a_graph()
+# word_graph = convert_words_to_a_graph()
 
-# Check first 10 connected words
-for word, neighbors in list(word_graph.items())[:10]:
-    print(f"{word}: {neighbors}")
+# # Check first 10 connected words
+# for word, neighbors in list(word_graph.items())[:10]:
+#     # print(f"{word}: {neighbors}")
 
 def uniform_cost_search(start_word, goal_word, word_graph):
   if start_word not in word_graph or goal_word not in word_graph:
@@ -94,7 +94,7 @@ def uniform_cost_search(start_word, goal_word, word_graph):
 
   while pq:
     cost, current_word, path = heapq.heappop(pq)
-    print(f"Expanding: {current_word}, Path so far: {path}") 
+    # print(f"expanding: {current_word}, path so far: {path}") 
     if current_word == goal_word:
       return path
     
@@ -105,19 +105,47 @@ def uniform_cost_search(start_word, goal_word, word_graph):
       #updated path and updated cpst
       for neighbor in word_graph[current_word]:
         if neighbor not in visited:
-          print(f"Adding {neighbor} to the queue") 
+        #  print (f"Adding {neighbor} to the queue") 
           heapq.heappush(pq, (cost+1, neighbor, path+[neighbor])) 
   return "no valid path"
   
-word_graph = convert_words_to_a_graph()
+#word_graph = convert_words_to_a_graph()
 # #write to a file
 # with open ('word_graph.txt', 'w') as file:
 #   file.write(str(word_graph))
 
-print(uniform_cost_search("bed", "red", word_graph))
+# print(uniform_cost_search("bed", "red", word_graph))
 
 
+#A* searc algorithm
+#heuristic function
+def heuristic(first_word, second_word):
+  return sum(a!=b for a,b in zip(first_word, second_word))
 
+#a* function
+def a_star_search(start_word, goal_word, word_graph):
+  print("here")
+  if start_word not in word_graph or goal_word not in word_graph:
+    return "no valid path : '{start_word}' or '{end_word}' not in word list"
+  #f(n) = g(n) + h(n), cost from node to node, start word, path
+  pq=[(0+heuristic(start_word, goal_word), 0, start_word, [start_word])]
+  visited = set()
+  while pq:
+    _, cost, current_word, path = heapq.heappop(pq)
+
+    if current_word == goal_word:
+      return path
+    if current_word not in visited:
+      visited.add(current_word)
+      for neighbor in word_graph[current_word]:
+        if neighbor not in visited:
+          g= cost+1
+          f=g+heuristic(neighbor, goal_word)
+          heapq.heappush(pq, (f, g, neighbor, path+[neighbor]))
+  return "no valid path"
+
+word_graph = convert_words_to_a_graph()
+print(a_star_search("bit","dog", word_graph))
 
 
 
