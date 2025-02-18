@@ -1,4 +1,5 @@
-from collections import defaultdict, heapq
+from collections import defaultdict
+import heapq
 
 def check_one_letter_difference(word1, word2):
   #checking length of the word
@@ -23,8 +24,13 @@ def load_words_from_file():
   words_set = set()
   with open('words.txt', 'r') as file:
     for word in file:
-      words_set.add(word.strip())
-    return words_set
+      cleaned_word = word.strip().lower()
+      words_set.add(cleaned_word)
+  # print("loaded words (first 20):", list(words_set)[:20])
+    # print("Ssample words:", list(words_set)[:20])  # Check the first 20 words
+    # three_letter_words = [word for word in words_set if len(word) == 3]
+    # print("threeletter words:", three_letter_words[:20])  # Print first 20 short words
+  return words_set
 #convrting to graph
 def convert_words_to_a_graph():
 
@@ -49,7 +55,7 @@ def convert_words_to_a_graph():
           new_formed_word = word[:i] + char + word[i+1:]#all possile combos
           if new_formed_word in word_search and new_formed_word !=word:
             word_graph[word].append(new_formed_word)
-    return word_graph
+  return word_graph
 
 
     
@@ -65,15 +71,55 @@ def convert_words_to_a_graph():
   #       #undirected graph
   #       word_graph[word_list[i]].append(word_list[j])
   #       word_graph[word_list[j]].append(word_list[i])
-  return word_graph
+  
 #print('hi')
 #print(convert_words_to_a_graph()) 
 
 ######################search algorithms#############
 
-#ucs
- def uniform_cost_search(start_word, goal_word, word_graph):
+#ucs- words have been grouped by length and it takes equal amount of time to get from one word to  the other.
+
+word_graph = convert_words_to_a_graph()
+
+# Check first 10 connected words
+for word, neighbors in list(word_graph.items())[:10]:
+    print(f"{word}: {neighbors}")
+
+def uniform_cost_search(start_word, goal_word, word_graph):
+  if start_word not in word_graph or goal_word not in word_graph:
+    return "no valid path : '{start_word}' or '{end_word}' not in word list"
+  #pq w a tuple  w cost, starting word and the path taken thus far
+  pq = [(0, start_word, [start_word])]
+  visited = set()
+
+  while pq:
+    cost, current_word, path = heapq.heappop(pq)
+    print(f"Expanding: {current_word}, Path so far: {path}") 
+    if current_word == goal_word:
+      return path
+    
+    if current_word not in visited:
+      visited.add(current_word)
+
+      #word_graph[current_word] is a list of neighbors of current_word, neighbor is a single word
+      #updated path and updated cpst
+      for neighbor in word_graph[current_word]:
+        if neighbor not in visited:
+          print(f"Adding {neighbor} to the queue") 
+          heapq.heappush(pq, (cost+1, neighbor, path+[neighbor])) 
+  return "no valid path"
   
+word_graph = convert_words_to_a_graph()
+# #write to a file
+# with open ('word_graph.txt', 'w') as file:
+#   file.write(str(word_graph))
+
+print(uniform_cost_search("bed", "red", word_graph))
+
+
+
+
+
 
 
 
