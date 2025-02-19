@@ -1,7 +1,7 @@
 from collections import defaultdict, deque
 import heapq
 import time
-
+import random
 
 def check_one_letter_difference(word1, word2):
   #checking length of the word
@@ -207,12 +207,70 @@ def compare_algos(start_word, goal_word, word_graph):
     path = find_path(start_word, goal_word, word_graph, algo)
     results[algo]= {"path":path,"time":time.time()-starttime}
   return results
-start_word, goal_word = "heart", "smart"
-comparison_results = compare_algos(start_word, goal_word, word_graph)
-for algo, result in comparison_results.items():
-    print(f"{algo.upper()} search:")
-    print(f"path: {result['path']}")
-    print(f"time elapsed: {result['time']}seconds\n")
+
+#generting random words
+def generate_start_and_end_words(word_gaph):
+  all_words = list(word_graph.keys())
+  while True:
+    start_word, goal_word =random.sample(all_words, 2)
+    if find_path(start_word, goal_word, word_graph, "astar") != "no valid path":
+      return start_word, goal_word
+
+##########################game play#########################################
+def gameplay(word_graph):
+  print("=========================================================\n")
+  print("WORD LADDER 🪜")
+  print("=========================================================\n")
+  start_word, goal_word = generate_start_and_end_words(word_graph)
+  print("instructions")
+  print("1. you are given a start word and a goal word.")
+  print(f"your challenge: transform '{start_word}' into '{goal_word}'")
+
+  current_path = [start_word]
+
+  while current_path[-1]!= goal_word:
+    print("current path:", current_path)
+    next_word = input("enter the next word🧠 or enter '?' for an ai generated hint🪄: ").strip().lower()
+
+    if next_word == "?":
+      print("ai-guru at work🧝‍♀️")
+      ai_path= find_path(start_word, goal_word, word_graph, "astar")
+      #wen and if i get no errors
+      if isinstance(ai_path, list):
+        ai_path = find_path(current_path[-1], goal_word, word_graph, "astar")
+        print(f"AI Full Path: {ai_path}")  # Debugging step
+
+        for word in ai_path[1:]:  # Skip the start word
+          if word not in current_path:  # Find the next valid move
+              print(f"Hint: Try '{word}'")
+              break
+    
+      else:
+        print("why look at that! you managed to mess up so bad even ai gave up:/")
+      continue
+    if next_word in word_graph[current_path[-1]]:
+      current_path.append(next_word)
+
+    else:
+      print("invalid move, try again")
+
+  print(f"congratulations! you have successfully completed the word ladder in '{len(current_path)-1}' moves")
+  algo_performace= compare_algos(start_word, goal_word, word_graph)
+  print("algorithm performance:")
+  for algo, performance in algo_performace.items():
+    print(f"{algo.upper()} search: path:{performance['path']},time: {performance['time']}s")
+  if input("play again? (yes/no):").strip().lower() != "yes":
+        print("thanks for playing!")
+        return 
+  gameplay(word_graph)
+gameplay(word_graph)
+
+# start_word, goal_word = "heart", "smart"
+# comparison_results = compare_algos(start_word, goal_word, word_graph)
+# for algo, result in comparison_results.items():
+#     print(f"{algo.upper()} search:")
+#     print(f"path: {result['path']}")
+#     print(f"time elapsed: {result['time']}seconds\n")
 
 
 
