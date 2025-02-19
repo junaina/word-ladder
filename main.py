@@ -1,5 +1,6 @@
 from collections import defaultdict, deque
 import heapq
+import time
 
 
 def check_one_letter_difference(word1, word2):
@@ -163,11 +164,55 @@ def bfs_search(start_word, goal_word, word_graph):
         if neighbor not in visited:
           queue.append((neighbor, path+[neighbor]))
   return "no valid path found"
+
+
+#the find path function
+def find_path(start_word, goal_word, word_graph, algorithm):
+  if algorithm.lower() == "astar":
+    return a_star_search(start_word, goal_word, word_graph)
+  elif algorithm.lower() == "ucs":
+    return uniform_cost_search(start_word, goal_word, word_graph)
+  elif algorithm.lower() == "bfs":
+    return bfs_search(start_word, goal_word, word_graph)
+  else:
+    return "incorrect specifier. chose from astar, ucs, bfs" 
+
+# print(bfs_search("bit","dog", word_graph))
+###################testing the algorithms against differentinpust####### 
+# word_graph = convert_words_to_a_graph()
+# test_cases = [
+#     ("red", "bed"),
+#     ("cat", "dog"),
+#     ("lead", "gold"),
+#     ("hope", "fear"),
+#     ("cold", "warm"),
+#     ("start", "end"),
+#     ("heart", "smart"),
+# ]
+
+# for start, goal in test_cases:
+#     print(f"a* search from '{start}' to '{goal}':", find_path(start, goal, word_graph, algorithm="astar"))
+#     print(f"bfs search from '{start}' to '{goal}':", find_path(start, goal, word_graph, algorithm="bfs"))
+#     print(f"ucs search from '{start}' to '{goal}':", find_path(start, goal, word_graph, algorithm="ucs"))
+#     print("-------")
+
+
+
+###############algorithm performance############
 word_graph = convert_words_to_a_graph()
-print(bfs_search("bit","dog", word_graph))
-
-
-
+def compare_algos(start_word, goal_word, word_graph):
+  results = {}
+  for algo in ["astar", "ucs", "bfs"]:
+    starttime = time.time()
+    path = find_path(start_word, goal_word, word_graph, algo)
+    results[algo]= {"path":path,"time":time.time()-starttime}
+  return results
+start_word, goal_word = "heart", "smart"
+comparison_results = compare_algos(start_word, goal_word, word_graph)
+for algo, result in comparison_results.items():
+    print(f"{algo.upper()} search:")
+    print(f"path: {result['path']}")
+    print(f"time elapsed: {result['time']}seconds\n")
 
 
 
