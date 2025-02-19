@@ -1,5 +1,6 @@
-from collections import defaultdict
+from collections import defaultdict, deque
 import heapq
+
 
 def check_one_letter_difference(word1, word2):
   #checking length of the word
@@ -144,8 +145,26 @@ def a_star_search(start_word, goal_word, word_graph):
           heapq.heappush(pq, (f, g, neighbor, path+[neighbor]))
   return "no valid path"
 
+# bfs searc
+def bfs_search(start_word, goal_word, word_graph):
+  if start_word not in word_graph or goal_word not in word_graph:
+    return "no valid path: '{start_word}' or '{end_word}' not in word list"
+  queue = deque([(start_word, [start_word])])
+  visited = set()
+  while queue:
+    current_word, path= queue.popleft()
+
+    if current_word==goal_word:
+      return path
+
+    if current_word not in visited:
+      visited.add(current_word)
+      for neighbor in word_graph[current_word]:
+        if neighbor not in visited:
+          queue.append((neighbor, path+[neighbor]))
+  return "no valid path found"
 word_graph = convert_words_to_a_graph()
-print(a_star_search("bit","dog", word_graph))
+print(bfs_search("bit","dog", word_graph))
 
 
 
