@@ -238,10 +238,10 @@ def gameplay(word_graph):
       #wen and if i get no errors
       if isinstance(ai_path, list):
         ai_path = find_path(current_path[-1], goal_word, word_graph, "astar")
-        print(f"AI Full Path: {ai_path}")  # Debugging step
+        print(f"ai path: {ai_path}") 
 
-        for word in ai_path[1:]:  # Skip the start word
-          if word not in current_path:  # Find the next valid move
+        for word in ai_path[1:]: 
+          if word not in current_path:
               print(f"Hint: Try '{word}'")
               break
     
