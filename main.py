@@ -209,23 +209,78 @@ def compare_algos(start_word, goal_word, word_graph):
   return results
 
 #generting random words
-def generate_start_and_end_words(word_gaph):
+def generate_start_and_end_words(word_graph, level="beginner"):
+  print("entered generate_start_and_end_words")
   all_words = list(word_graph.keys())
-  while True:
-    start_word, goal_word =random.sample(all_words, 2)
-    if find_path(start_word, goal_word, word_graph, "astar") != "no valid path":
-      return start_word, goal_word
+
+  length_groups =  defaultdict(list)
+  for word in all_words:
+    length_groups[len(word)].append(word)
+  print("length groups:", length_groups)
+
+  valid_lengths = list(length_groups.keys())
+  chosen_length = random.choice(valid_lengths)
+  all_words = length_groups[chosen_length]
+  print("all words:", all_words)
+
+  #difficulty level based on heuristics
+  if level=="beginner":
+    print("breakpt1")
+    max_dist = 3
+    print("breakpt2")
+  elif level=="advanced":
+    max_dist = 6
+  else:
+    max_dist = 9
+    # banned_words = set(random.sample(all_words, min(len(all_words), 5)))
+    # restricted_letters = set(random.sample("abcdefghijklmnopqrstuvwxyz", 2))
+  for _ in range(100):
+    start_word, goal_word = random.sample(all_words, 2)
+    heuristic_dist = heuristic(start_word, goal_word)
+
+    #filtering banned words and restricted letters in challenge ode
+    if level == "challenge":
+
+      banned_words = set(random.sample(all_words, min(len(all_words), 5)))
+      path1 = find_path(start_word, goal_word, word_graph, "astar")
+      path2 = find_path(start_word, goal_word, word_graph, "bfs")
+      if path1 != "no valid path" and path2 != "no valid path" and len(path1) > 1 and len(path2) > 1:
+        if any(word in banned_words for word in path1):
+          print("🚫 Shortest path contains banned words. AI will switch to second shortest path.")
+          return start_word, goal_word, banned_words, path2
+        return start_word, goal_word, banned_words, path1
+
+    if heuristic_dist <= max_dist:
+      path = find_path(start_word, goal_word, word_graph, "astar")
+      if path != "no valid path":
+        return start_word, goal_word
+  #fallback
+  return random.sample(all_words, 2)
+  # while True:
+  #   start_word, goal_word =random.sample(all_words, 2)
+  #   if find_path(start_word, goal_word, word_graph, "astar") != "no valid path":
+  #     return start_word, goal_word
 
 ##########################game play#########################################
 def gameplay(word_graph):
   print("=========================================================\n")
   print("WORD LADDER 🪜")
   print("=========================================================\n")
-  start_word, goal_word = generate_start_and_end_words(word_graph)
+  level = input("choose a difficulty level (beginner, advanced, challenge): ").strip().lower()
+  result = generate_start_and_end_words(word_graph, level)
+
+  if len(result) == 4:
+      start_word, goal_word, banned_words, ai_path = result
+  else:
+      start_word, goal_word = result
+      banned_words, ai_path = set(), []
   print("instructions")
   print("1. you are given a start word and a goal word.")
   print(f"your challenge: transform '{start_word}' into '{goal_word}'")
 
+  banned_words = set()
+  if level == "challenge":
+    print(f"🚫 Banned Words: {banned_words}")
   current_path = [start_word]
 
   while current_path[-1]!= goal_word:
@@ -233,21 +288,29 @@ def gameplay(word_graph):
     next_word = input("enter the next word🧠 or enter '?' for an ai generated hint🪄: ").strip().lower()
 
     if next_word == "?":
-      print("ai-guru at work🧝‍♀️")
-      ai_path= find_path(start_word, goal_word, word_graph, "astar")
+      print("guru at work🧝‍♀️")
+      # ai_path= find_path(start_word, goal_word, word_graph, "astar")
       #wen and if i get no errors
-      if isinstance(ai_path, list):
-        ai_path = find_path(current_path[-1], goal_word, word_graph, "astar")
-        print(f"ai path: {ai_path}") 
-
-        for word in ai_path[1:]: 
-          if word not in current_path:
-              print(f"Hint: Try '{word}'")
-              break
-    
+      ai_path = find_path(current_path[-1], goal_word, word_graph, "astar")
+      if isinstance(ai_path, list) and len(ai_path)>1:
+        # ai_path = find_path(current_path[-1], goal_word, word_graph, "astar")
+        for word in ai_path[1:]:
+          if (word not in current_path and word not in banned_words ):
+            print(f"Hint: Try '{word}'")
+            break
+          
+          else:
+                print("🚫 AI couldn't find a valid move that avoids banned words and letters.")
       else:
         print("why look at that! you managed to mess up so bad even ai gave up:/")
+        print(f"ai path: {ai_path}") 
       continue
+    if level == "challenge":
+      if next_word in banned_words:
+          print("🚫 This word is banned! Try another word.")
+          continue
+     
+    
     if next_word in word_graph[current_path[-1]]:
       current_path.append(next_word)
 
