@@ -24,14 +24,17 @@ def check_one_letter_difference(word1, word2):
 
 def load_words_from_file():
   words_set = set()
+  #intuition: making this a set cause i need faster search
+  # 
+  # 
   with open('words.txt', 'r') as file:
     for word in file:
       cleaned_word = word.strip().lower()
       words_set.add(cleaned_word)
   # print("loaded words (first 20):", list(words_set)[:20])
-    # print("Ssample words:", list(words_set)[:20])  # Check the first 20 words
+    # print("ssample words:", list(words_set)[:20])  
     # three_letter_words = [word for word in words_set if len(word) == 3]
-    # print("threeletter words:", three_letter_words[:20])  # Print first 20 short words
+    # print("threeletter words:", three_letter_words[:20])  
   return words_set
 #convrting to graph
 def convert_words_to_a_graph():
@@ -134,7 +137,6 @@ def a_star_search(start_word, goal_word, word_graph):
   visited = set()
   while pq:
     _, cost, current_word, path = heapq.heappop(pq)
-
     if current_word == goal_word:
       return path
     if current_word not in visited:
@@ -243,10 +245,13 @@ def generate_start_and_end_words(word_graph, level="beginner"):
 
       banned_words = set(random.sample(all_words, min(len(all_words), 5)))
       path1 = find_path(start_word, goal_word, word_graph, "astar")
+      # print("path1:", path1)
+      #bfs path to ensue multiple unbanned paths exist
       path2 = find_path(start_word, goal_word, word_graph, "bfs")
-      if path1 != "no valid path" and path2 != "no valid path" and len(path1) > 1 and len(path2) > 1:
+      # print("path2:", path2)
+      if path1!="no valid path" and path2!= "no valid path" and len(path1)>1 and len(path2)>1:
         if any(word in banned_words for word in path1):
-          print("🚫 Shortest path contains banned words. AI will switch to second shortest path.")
+          print("shortest path contains banned words. switching to second shortest path.")
           return start_word, goal_word, banned_words, path2
         return start_word, goal_word, banned_words, path1
 
@@ -280,7 +285,7 @@ def gameplay(word_graph):
 
   banned_words = set()
   if level == "challenge":
-    print(f"🚫 Banned Words: {banned_words}")
+    print(f"🚫 BANNED WORDS: {banned_words}")
   current_path = [start_word]
 
   while current_path[-1]!= goal_word:
@@ -296,18 +301,18 @@ def gameplay(word_graph):
         # ai_path = find_path(current_path[-1], goal_word, word_graph, "astar")
         for word in ai_path[1:]:
           if (word not in current_path and word not in banned_words ):
-            print(f"Hint: Try '{word}'")
+            print(f"psst! try '{word}'")
             break
           
           else:
-                print("🚫 AI couldn't find a valid move that avoids banned words and letters.")
+                print("couldn't find a valid move that avoids banned words and letters.")
       else:
         print("why look at that! you managed to mess up so bad even ai gave up:/")
         print(f"ai path: {ai_path}") 
       continue
     if level == "challenge":
       if next_word in banned_words:
-          print("🚫 This word is banned! Try another word.")
+          print("🚫🚫🚫🚫🚫🚫🚫 this word is banned >-< >-< >-< give it another shot.🚫🚫🚫🚫🚫🚫🚫")
           continue
      
     
